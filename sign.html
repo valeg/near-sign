@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>NEAR Mobile — Подпись сообщения</title>
+</head>
+<body>
+<h2>Подписать сообщение через NEAR Mobile</h2>
+
+<label>Ваш NEAR-аккаунт (receiverId):</label><br>
+<input id="receiverId" value="example.near" style="width:300px"><br><br>
+
+<label>Сообщение для подписи:</label><br>
+<textarea id="message" rows="4" cols="40">Hello from NEAR Mobile!</textarea><br><br>
+
+<button onclick="signMessage()">Подписать</button>
+
+<h3>Результат:</h3>
+<pre id="result" style="background:#f0f0f0;padding:10px;border:1px solid #ccc;max-width:500px;overflow:auto;"></pre>
+
+<script>
+// Парсим подпись, возвращённую NEAR Mobile через URL-параметры
+function parseReturn() {
+    const params = new URLSearchParams(window.location.search);
+    if (params.has("signature") && params.has("publicKey")) {
+        const signature = params.get("signature");
+        const publicKey = params.get("publicKey");
+        const accountId = params.get("accountId");
+        document.getElementById("result").textContent =
+            `Аккаунт: ${accountId}\n` +
+            `Публичный ключ: ${publicKey}\n` +
+            `Подпись (base64): ${signature}`;
+    }
+}
+
+function signMessage() {
+    const receiverId = document.getElementById("receiverId").value.trim();
+    const message = document.getElementById("message").value;
+
+    if (!receiverId) {
+        alert("Введите receiverId (ваш NEAR-аккаунт)");
+        return;
+    }
+
+    const encodedMessage = btoa(message);
+    const callbackUrl = encodeURIComponent(window.location.href.split('?')[0]); // возврат на эту же страницу
+    const url = `near://sign-message?receiverId=${encodeURIComponent(receiverId)}&message=${encodeURIComponent(encodedMessage)}&callbackUrl=${callbackUrl}`;
+
+    window.location.href = url;
+}
+
+// Запускаем парсер при загрузке
+parseReturn();
+</script>
+</body>
+</html>
